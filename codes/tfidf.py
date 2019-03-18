@@ -31,8 +31,8 @@ def not_numbers(s):
 
     return True
 
-# 计算TF-IDF，返回特征词的列索引字典和TF-IDF矩阵
-def tfidf(filepath):
+# 计算TF-IDF，返回论文列表、特征词的列索引字典和TF-IDF矩阵
+def calc(filepath):
 
     # 读取Excel文件
     data = xlrd.open_workbook(filepath)
@@ -46,10 +46,13 @@ def tfidf(filepath):
     stopwords = [line.strip() for line in open('../dicts/哈工大停用词表.txt', 'r').readlines()]
     # 存放分词、去停用词后的最终待计算数据
     corpus = []
+    # 存储论文名
+    paperlist = []
 
-    for rowid in range(0, numrows):
+    for rowid in range(numrows):
         # 根据行号获取整行内容
         row = sheet.row_values(rowid)
+        paperlist.append(row[0])
         # 将title, keywords和summary拼接为一个文档
         text = row[0] + ';' + row[4] + ';' + row[5]
         # 调用jieba分词，采用精确模式
@@ -74,11 +77,12 @@ def tfidf(filepath):
     # 计算TF-IDF值
     tfidf = transformer.fit_transform(X)
 
-    # 返回列索引和TF-IDF矩阵
-    return (feature2index, tfidf.toarray())
+    # 返回论文列表、列索引和TF-IDF矩阵
+    return (paperlist, feature2index, tfidf.toarray())
 
 if __name__=='__main__':
 
-    (feature2index, weight) = tfidf('../data/test.xlsx')
+    (paperlist, feature2index, weight) = calc('../data/raw.xlsx')
+    print(paperlist)
     print(feature2index)
     print(weight)
